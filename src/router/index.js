@@ -9,6 +9,8 @@
   import TicketPage from '../views/Admin/BookedTickets.vue';
   import CardPage from '../views/Admin/CardHolder.vue';
   import CardTopup from '../views/Admin/CardTopup.vue';
+  import Users from '../views/Admin/ManageUser.vue';
+
 
 
 
@@ -58,6 +60,13 @@
         path: '/routes',
         name: 'routes',
         component: RoutesPage,
+        meta: { requiresAuth: true }
+      },
+
+      {
+        path: '/users',
+        name: 'users',
+        component: Users,
         meta: { requiresAuth: true }
       },
 

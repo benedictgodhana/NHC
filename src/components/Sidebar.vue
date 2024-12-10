@@ -1,8 +1,9 @@
 <template>
     <!-- Sidebar -->
     <v-navigation-drawer v-model="drawer" app style="color: black;">
-      <v-img src="src/assets/logo.png" alt="Logo" max-height="100" style="margin-top: 20px;" class=""></v-img>
+      <v-img src="/nch-removebg-preview.png" alt="Logo" max-height="100" style="margin-top: 20px;" class=""></v-img>
       <br>
+      <v-divider></v-divider>
 
       <v-list nav dense>
 
@@ -19,6 +20,9 @@
         <v-list-item @click="$router.push('/routes')" prepend-icon="mdi-routes" title="Routes" value="Routes">
         </v-list-item>
 
+
+        <v-list-item @click="$router.push('/users')" prepend-icon="mdi-account-plus" title="Manage Users" value="Users">
+        </v-list-item>
         <v-list-item @click="$router.push('/card_holders')" prepend-icon="mdi-card" title="Cards" value="Cards">
 </v-list-item>
 

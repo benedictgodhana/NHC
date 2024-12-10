@@ -4,6 +4,15 @@
     <v-container class="container"  width="100%" >
 
     <v-row>
+
+      <v-col cols="12" sm="6" md="3">
+            <v-card class="pa-4 elevation-2" outlined style="width: 100%; border: 1px solid #ddd;">
+                <v-icon color="primary" size="40">mdi-account-multiple</v-icon>
+                <div class="text-title mt-2">Registered Users</div>
+                <div class="text-subtitle-1 font-weight-bold">{{ userCount  }}</div>
+                <v-btn class="mt-3" color="primary" block>View Details</v-btn>
+            </v-card>
+        </v-col>
         <!-- Total Registered Users -->
         <v-col cols="12" sm="6" md="3">
             <v-card class="pa-4 elevation-2" outlined style="width: 100%; border: 1px solid #ddd;">
@@ -13,6 +22,9 @@
                 <v-btn class="mt-3" color="primary" block>View Details</v-btn>
             </v-card>
         </v-col>
+
+
+
 
         <!-- Total Active Cards -->
         <v-col cols="12" sm="6" md="3">
@@ -124,6 +136,7 @@ export default {
       monthlyTransactions: 0, // Default value for monthly transactions
     todaysTransactions: 0,  //
     activeCardCount: 0,     // To store the active card count
+    userCount: 0, // Store the user count
     
     };
   },
@@ -153,6 +166,26 @@ export default {
         console.error('Error fetching route count:', error);
       }
     },
+    async getUserCount() {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return console.error('No token found. Please log in.');
+
+      const response = await axiosInstance.get('/user-count', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.success) {
+        this.userCount = response.data.count; // Ensure this matches the response format
+      } else {
+        console.error('Failed to fetch user count:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching user count:', error);
+    }
+  },
+
+
 
     async fetchMonthlyTransactions() {
   const token = localStorage.getItem('token');
@@ -251,7 +284,7 @@ async fetchTodaysTransactions() {
   mounted() {
     // Call fetchRouteCount when the component is mounted
     this.fetchRouteCount();
-
+    this.getUserCount();  // Fetch user count
     this.fetchMonthlyTransactions();
     this.fetchTodaysTransactions();
     this.fetchActiveCardCount(); // Fetch active card count
