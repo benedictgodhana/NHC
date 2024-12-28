@@ -18,7 +18,6 @@ const form = ref({
 const error = ref(null);
 const loading = ref(false); // Add a loading state for the button
 const router = useRouter(); // Initialize router
-
 const submit = async () => {
     error.value = null; // Clear any previous errors
     loading.value = true; // Start loading
@@ -30,12 +29,33 @@ const submit = async () => {
             remember: form.value.remember,
         });
 
-        console.log(response.data); // Log the entire response
+        console.log('Login Response:', response.data); // Log the entire response
 
         if (response.data.token) {
-            localStorage.setItem('token', response.data.token); // Save the token
-            localStorage.setItem('user_id', response.data.user.id); // Save the user ID
-            router.push('/dashboard'); // Redirect to dashboard
+            const { token, user } = response.data;
+            
+            // Ensure role exists and save it
+            localStorage.setItem('token', token);
+            localStorage.setItem('user_id', user.id);
+            localStorage.setItem('user_role', JSON.stringify(user.roles ? user.roles[0].name : '')); // Extract the role if it's available
+            
+            console.log('User Role:', user.roles ? user.roles[0].name : 'undefined');
+            console.log('Redirecting to:', user.roles ? (user.roles[0].name === 'Admin' ? '/dashboard' : user.roles[0].name === 'Manager' ? '/manager-dashboard' : user.roles[0].name === 'Cashier' ? '/cashier-dashboard' : 'Invalid role') : 'Invalid role');
+
+            // Redirect based on role
+            switch (user.roles ? user.roles[0].name : '') {
+                case 'Admin':
+                    router.push('/dashboard');
+                    break;
+                case 'Manager':
+                    router.push('/manager-dashboard');
+                    break;
+                case 'Cashier':
+                    router.push('/cashier-dashboard');
+                    break;
+                default:
+                    error.value = 'Invalid role. Contact system administrator.';
+            }
         } else {
             error.value = 'No token found in the response.';
         }
@@ -46,6 +66,7 @@ const submit = async () => {
         loading.value = false; // Stop loading after response
     }
 };
+
 </script>
 
 <template>
@@ -61,9 +82,8 @@ const submit = async () => {
                     max-width="80"
                     class="mr-2"
                 ></v-img>
-                <span class="login-title">Bus Commuter Smart Card</span>
             </v-card-title>
-
+<v-card-title>NAMIB CONTRACT HAULAGE</v-card-title>
             <!-- Status Alert -->
             <v-card-text class="mt-16">
                 <div v-if="status" class="mb-4">
@@ -80,7 +100,7 @@ const submit = async () => {
                                 label="Username"
                                 v-model="form.username"
                                 required
-                                variant="underlined"
+                                variant="outlined"
                                 class="input-field"
                                 autofocus
                                 autocomplete="username"
@@ -96,7 +116,7 @@ const submit = async () => {
                                 type="password"
                                 v-model="form.password"
                                 required
-                                variant="underlined"
+                                variant="outlined"
                                 class="input-field"
                                 autocomplete="current-password"
                                 prepend-inner-icon="mdi-lock"
@@ -109,7 +129,7 @@ const submit = async () => {
                         type="submit"  
                         :loading="loading" 
                         color="red"
-                        class="login-button"
+                        style="text-transform: capitalize;"
                     >
                         Log in <v-icon class="ml-2">mdi-login</v-icon>
                     </v-btn>
@@ -141,15 +161,26 @@ const submit = async () => {
 .min-vh-100 {
     min-height: 100vh;
     color: white;
-    background-image: url('/Images/bus-background.svg'); /* Bus-themed background */
+    background-image: url('IMG_0333-scaled.jpg'); /* Background image */
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
+    opacity: 0.8; /* Dim the image */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5); /* Dim overlay with black */
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 600px) {
+    .min-vh-100 {
+        background-size: cover; /* Ensure the image fits within the screen for smaller devices */
+    }
 }
 
 /* Card */
 .login-card {
-    border-radius: 12px;
     background: #ffffff; /* White card background */
     padding: 2rem;
     box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
@@ -159,7 +190,6 @@ const submit = async () => {
 .login-title {
     font-size: 1.5rem; /* Slightly increased font size */
     color: #d32f2f; /* Red accent color */
-    font-family: 'Roboto', sans-serif;
     font-weight: bold;
 }
 

@@ -10,20 +10,20 @@
         <v-list-item @click="$router.push('/dashboard')" prepend-icon="mdi-home" title="Dashboard" value="Dashboard">
         </v-list-item>
 
-        <v-list-item @click="$router.push('/commute-schedules')" prepend-icon="mdi-calendar-clock" title="Commute Schedules" value="Commute Schedules">
+        <v-list-item @click="$router.push('/commute-schedules')" prepend-icon="mdi-calendar-clock" title="Commute Schedules" value="Commute Schedules"  >
         </v-list-item>
 
-        <v-list-item @click="$router.push('/book-tickets')" prepend-icon="mdi-ticket" title="All Booked Tickets" value="Book Tickets">
-        </v-list-item>
-
-
-        <v-list-item @click="$router.push('/routes')" prepend-icon="mdi-routes" title="Routes" value="Routes">
+        <v-list-item @click="$router.push('/book-tickets')" prepend-icon="mdi-ticket" title="All Booked Tickets" value="Book Tickets"  >
         </v-list-item>
 
 
-        <v-list-item @click="$router.push('/users')" prepend-icon="mdi-account-plus" title="Manage Users" value="Users">
+        <v-list-item @click="$router.push('/routes')" prepend-icon="mdi-routes" title="Routes" value="Routes" >
         </v-list-item>
-        <v-list-item @click="$router.push('/card_holders')" prepend-icon="mdi-card" title="Cards" value="Cards">
+
+
+        <v-list-item @click="$router.push('/users')" prepend-icon="mdi-account-plus" title="Manage Users" value="Users"  >
+        </v-list-item>
+        <v-list-item @click="$router.push('/card_holders')" prepend-icon="mdi-card" title="Cards" value="Cards"  >
 </v-list-item>
 
 <v-list-item @click="$router.push('/card_top_up')" prepend-icon="mdi-cash" title="Card Top Up" value="Card Top Up">
