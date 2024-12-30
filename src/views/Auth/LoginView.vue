@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { VContainer, VRow, VCol, VTextField, VBtn, VAlert, VCard, VCardTitle, VCardText, VCardActions, VImg } from 'vuetify/components';
 import { useRouter } from 'vue-router'; // Import useRouter from vue-router
 import axiosInstance from '@/service/api'; // Axios instance
@@ -18,12 +18,27 @@ const form = ref({
 const error = ref(null);
 const loading = ref(false); // Add a loading state for the button
 const router = useRouter(); // Initialize router
+
+// Validate the form
+const isValidForm = computed(() => {
+    const usernameValid = form.value.username.trim() !== '' && form.value.username.length >= 3; // Ensure username is at least 3 characters
+    const passwordValid = form.value.password.trim() !== '' && form.value.password.length >= 6;
+    return usernameValid && passwordValid;
+});
+
 const submit = async () => {
     error.value = null; // Clear any previous errors
     loading.value = true; // Start loading
 
+    // Check if the form is valid
+    if (!isValidForm.value) {
+        error.value = 'Please fill in all required fields with valid values.';
+        loading.value = false;
+        return;
+    }
+
     try {
-        const response = await axiosInstance.post('/login', {
+        const response = await axiosInstance.post('/login', { // Adjust to NHC login endpoint
             username: form.value.username,
             password: form.value.password,
             remember: form.value.remember,
@@ -40,18 +55,12 @@ const submit = async () => {
             localStorage.setItem('user_role', JSON.stringify(user.roles ? user.roles[0].name : '')); // Extract the role if it's available
             
             console.log('User Role:', user.roles ? user.roles[0].name : 'undefined');
-            console.log('Redirecting to:', user.roles ? (user.roles[0].name === 'Admin' ? '/dashboard' : user.roles[0].name === 'Manager' ? '/manager-dashboard' : user.roles[0].name === 'Cashier' ? '/cashier-dashboard' : 'Invalid role') : 'Invalid role');
+            console.log('Redirecting to:', user.roles ? (user.roles[0].name === 'Admin' ? '/dashboard' : 'Invalid role') : 'Invalid role');
 
             // Redirect based on role
             switch (user.roles ? user.roles[0].name : '') {
                 case 'Admin':
                     router.push('/dashboard');
-                    break;
-                case 'Manager':
-                    router.push('/manager-dashboard');
-                    break;
-                case 'Cashier':
-                    router.push('/cashier-dashboard');
                     break;
                 default:
                     error.value = 'Invalid role. Contact system administrator.';
@@ -66,168 +75,171 @@ const submit = async () => {
         loading.value = false; // Stop loading after response
     }
 };
-
 </script>
 
 <template>
-    <v-container class="d-flex justify-center align-center min-vh-100" fluid>
-        <Head title="Bus Commuter Smart Card Login" />
-
-        <v-card max-width="450" width="100%" class="login-card" elevation="2">
-            <!-- Logo and Title -->
-            <v-card-title class="d-flex justify-center align-center" style="background-color: white;">
-                <v-img
-                    src="src/assets/logo.png"
-                    contain
-                    max-width="80"
-                    class="mr-2"
-                ></v-img>
-            </v-card-title>
-<v-card-title>NAMIB CONTRACT HAULAGE</v-card-title>
-            <!-- Status Alert -->
-            <v-card-text class="mt-16">
-                <div v-if="status" class="mb-4">
-                    <v-alert type="success" dismissible>
-                        {{ status }}
-                    </v-alert>
-                </div>
-
-                <!-- Login Form -->
-                <form @submit.prevent="submit">
-                    <v-row>
-                        <v-col cols="12">
-                            <v-text-field
-                                label="Username"
-                                v-model="form.username"
-                                required
-                                variant="outlined"
-                                class="input-field"
-                                autofocus
-                                autocomplete="username"
-                                prepend-inner-icon="mdi-account"
-                            ></v-text-field>
-                        </v-col>
-                    </v-row>
-
-                    <v-row>
-                        <v-col cols="12">
-                            <v-text-field
-                                label="Password"
-                                type="password"
-                                v-model="form.password"
-                                required
-                                variant="outlined"
-                                class="input-field"
-                                autocomplete="current-password"
-                                prepend-inner-icon="mdi-lock"
-                            ></v-text-field>
-                        </v-col>
-                    </v-row>
-
-                    <v-btn
-                        width="100%"
-                        type="submit"  
-                        :loading="loading" 
-                        color="red"
-                        style="text-transform: capitalize;"
-                    >
-                        Log in <v-icon class="ml-2">mdi-login</v-icon>
-                    </v-btn>
-
-                    <v-row class="mt-2">
-                        <v-col cols="12" class="d-flex justify-between">
-                            <router-link
-                                v-if="canResetPassword"
-                                :to="{ name: 'password.request' }"
-                                class="forgot-password-link"
-                            >
-                                Forgot Password?
-                            </router-link>
-                        </v-col>
-                    </v-row>
-                </form>
+    <v-container fluid class="d-flex align-center justify-center min-vh-100">
+      <v-row justify="center" align="center">
+        <v-col cols="12" sm="8" md="6" lg="4">
+         
+          <v-card
+            class="mx-auto pa-12 pb-8"
+            elevation="8"
+            max-width="448"
+            rounded="lg"
+          >
+          <v-img
+            class="mx-auto my-6"
+            max-width="228"
+            src="/nch-removebg-preview.png"
+          ></v-img>
+    
+            <!-- Display error message if any -->
+            <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+  
+            <v-text-field
+              v-model="form.username"
+              density="compact"
+              placeholder="Username"
+              prepend-inner-icon="mdi-account-outline"
+              variant="outlined"
+              :rules="[value => value && value.length >= 3 || 'Username must be at least 3 characters long.']"
+            ></v-text-field>
+  
+            <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
+              Password
+  
+              <a
+                class="text-caption text-decoration-none text-blue"
+                href="#"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Forgot login password?</a>
+            </div>
+  
+            <v-text-field
+              v-model="form.password"
+              :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+              :type="visible ? 'text' : 'password'"
+              density="compact"
+              placeholder="Enter your password"
+              prepend-inner-icon="mdi-lock-outline"
+              variant="outlined"
+              @click:append-inner="visible = !visible"
+              :rules="[value => value && value.length >= 6 || 'Password must be at least 6 characters long.']"
+            ></v-text-field>
+  
+            <v-card
+              class="mb-12"
+              color="surface-variant"
+              variant="tonal"
+            >
+            </v-card>
+  
+            <v-btn
+              @click="submit"
+              class="mb-8"
+              color="blue"
+              size="large"
+              variant="tonal"
+              block
+              :loading="loading"
+              :disabled="!isValidForm"
+            >
+              Log In
+            </v-btn>
+  
+            <v-card-text class="text-center">
+              <a
+                class="text-blue text-decoration-none"
+                href="#"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Sign up now <v-icon icon="mdi-chevron-right"></v-icon>
+              </a>
             </v-card-text>
-
-            <!-- Error Alert -->
-            <v-alert v-if="error" type="error" dismissible class="mt-4">
-                {{ error }}
-            </v-alert>
-        </v-card>
+          </v-card>
+        </v-col>
+      </v-row>
     </v-container>
 </template>
 
+
 <style scoped>
-/* General */
+/* Custom Styling for NHC */
 .min-vh-100 {
     min-height: 100vh;
-    color: white;
-    background-image: url('IMG_0333-scaled.jpg'); /* Background image */
+    background: url('/IMG_0333-scaled.jpg') no-repeat center center;
     background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 0.8; /* Dim the image */
+    opacity: 0.85;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.5); /* Dim overlay with black */
-}
-
-/* Responsive adjustments */
-@media screen and (max-width: 600px) {
-    .min-vh-100 {
-        background-size: cover; /* Ensure the image fits within the screen for smaller devices */
-    }
+    background-color: rgba(0, 0, 0, 0.6); /* Dim overlay */
 }
 
 /* Card */
 .login-card {
-    background: #ffffff; /* White card background */
+    background-color: #ffffff;
     padding: 2rem;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease-in-out;
+}
+
+.login-card:hover {
+    transform: translateY(-10px);
 }
 
 /* Title */
 .login-title {
-    font-size: 1.5rem; /* Slightly increased font size */
-    color: #d32f2f; /* Red accent color */
+    font-size: 1.5rem;
+    color: #d32f2f;
     font-weight: bold;
+    text-align: center;
+    margin-top: 1rem;
 }
 
 /* Input Fields */
 .input-field .v-input__control {
     border-radius: 8px;
-    background: #f7f7f7; /* Light grey background for inputs */
+    background-color: #f1f1f1;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     color: black;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.input-field .v-input__control::placeholder {
-    color: #bdbdbd;
+.input-field .v-input__control input {
+    font-size: 1rem;
 }
 
-/* Button */
-.login-button {
-    background: #d32f2f; /* Red background */
-    color: white;
-    font-weight: bold;
-    border-radius: 5px;
+/* Button Styling */
+v-btn {
     text-transform: capitalize;
-    transition: background 0.3s ease;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
 }
 
-.login-button:hover {
-    background: #b71c1c; /* Darker red for hover effect */
+v-btn:hover {
+    background-color: #b71c1c;
 }
 
 /* Links */
 .forgot-password-link {
-    color: #d32f2f; /* Red accent */
-    font-size: 0.85rem;
+    color: #d32f2f;
     text-decoration: underline;
 }
 
 .forgot-password-link:hover {
-    text-decoration: none;
+    color: #b71c1c;
+}
+
+/* Alerts */
+.v-alert {
+    background-color: #d32f2f;
+    color: white;
+    border-radius: 5px;
 }
 
 /* Responsive Adjustments */
@@ -237,7 +249,7 @@ const submit = async () => {
     }
 
     .login-title {
-        font-size: 1.2rem; /* Reduced font size for small screens */
+        font-size: 1.2rem;
     }
 }
 </style>

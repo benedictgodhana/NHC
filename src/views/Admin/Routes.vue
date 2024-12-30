@@ -1,3 +1,227 @@
+<template>
+  <v-app>
+    <Sidebar />
+    <v-container class="container" width="100%" style="margin-top: 100px;">
+      <v-row>
+        <v-col cols="12">
+          <v-card elevation="0" width="100%" style="max-width: 1200px; background-color: #f9f9f9;">
+           
+
+            <v-container>
+              <v-row class="mb-4">
+                <v-col >
+                  <v-text-field
+                    v-model="searchQuery"
+                    label="Search Routes"
+                    prepend-inner-icon="mdi-magnify"
+                    clearable
+                    variant="outlined"
+                    dense
+                  ></v-text-field>
+                </v-col>
+                <v-col >
+                  <v-select
+                    v-model="filterByDestination"
+                    :items="['All', 'Destination A', 'Destination B', 'Destination C']"
+                    label="Filter by Destination"
+                    prepend-inner-icon="mdi-filter"
+                    variant="outlined"
+                    dense
+                  ></v-select>
+                </v-col>
+                
+              </v-row>
+
+              <v-data-table
+                v-model:items-per-page="perPage"
+                :headers="headers"
+                :items="paginatedRoutes"
+                :search="searchQuery"
+                item-value="id"
+                class="elevation-0"
+                no-data-text="No routes found"
+              >
+              <template v-slot:top>
+    <v-toolbar flat>
+      <v-toolbar-title>User Management</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn  @click="toggleForm('add')" color="green" style="text-transform: capitalize;"  variant="flat">
+        <v-icon left>mdi-plus</v-icon>Add Route
+      </v-btn>
+    </v-toolbar>
+    <br>
+   
+
+              <br>
+  </template>
+              
+                <template v-slot:body="props">
+                  <tr v-for="route in props.items" :key="route.id">
+                    <td>{{ route.from }}</td>
+                    <td>{{ route.to }}</td>
+                    <td>KES {{ route.fare }}</td>
+                    <td>{{ route.user_name }}</td>
+
+                    <td>
+                      <v-chip
+                        color="success"
+                        @click="toggleForm('edit', route)"
+                        close
+                      >
+                        <v-icon>mdi-pencil</v-icon> Edit
+                      </v-chip>
+                      <v-chip
+                        color="red"
+                        @click="deleteRoute(route.id)"
+                        close
+                      >
+                        <v-icon>mdi-delete</v-icon> Delete
+                      </v-chip>
+                    </td>
+                  </tr>
+                </template>
+              </v-data-table>
+
+            </v-container>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!-- Dialog for adding a new route -->
+    <v-dialog v-model="addDialog" persistent max-width="600px">
+  <template v-slot:default="{ close }">
+    <v-card>
+      <v-toolbar>
+        <v-card-text class="text-center" style="font-size: 21px;">
+          Add Route
+        </v-card-text>
+    </v-toolbar>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="newRoute.from"
+                label="From"
+                required
+                :rules="[v => !!v || 'From is required']"
+                prepend-inner-icon="mdi-map-marker"  
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model="newRoute.to"
+                label="To"
+                required
+                :rules="[v => !!v || 'To is required']"
+                prepend-inner-icon="mdi-map-marker"  
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                v-model="newRoute.fare"
+                label="Fare (KES)"
+                type="number"
+                required
+                :rules="[v => !!v || 'Fare is required']"
+                prepend-inner-icon="mdi-cash"  
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn text @click="closeDialog">Cancel</v-btn>
+        <v-btn color="primary" @click="addRoute">Add</v-btn>
+      </v-card-actions>
+    </v-card>
+  </template>
+</v-dialog>
+
+
+    <!-- Dialog for editing an existing route -->
+    <v-dialog v-model="editDialog" persistent max-width="600px">
+      <template v-slot:default="{ close }">
+        <v-card>
+          <v-toolbar>
+        <v-card-text class="text-center" style="font-size: 21px;">
+          Edit Route
+        </v-card-text>
+    </v-toolbar>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="routeToEdit.from"
+                    label="From"
+                    prepend-inner-icon="mdi-map-marker"  
+
+                    required
+                    :rules="[v => !!v || 'From is required']"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="routeToEdit.to"
+                    label="To"
+                    prepend-inner-icon="mdi-map-marker"  
+
+                    required
+                    :rules="[v => !!v || 'To is required']"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="routeToEdit.fare"
+                    label="Fare (KES)"
+                    type="number"
+                    prepend-inner-icon="mdi-cash"  
+
+                    required
+                    :rules="[v => !!v || 'Fare is required']"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="closeDialog">Cancel</v-btn>
+            <v-btn color="primary" @click="updateRoute">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </template>
+    </v-dialog>
+
+    <!-- Dialog for exporting routes -->
+    <v-dialog v-model="exportDialog" persistent max-width="600px">
+      <template v-slot:default="{ close }">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Export Routes</span>
+          </v-card-title>
+
+          <v-card-text>
+            <p>Click below to export the routes as a PDF file.</p>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click="exportRoutes">Export</v-btn>
+            <v-btn text @click="closeDialog">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+      </template>
+    </v-dialog>
+
+  </v-app>
+</template>
+
 <script>
 import axiosInstance from '@/service/api'; // Import your axios instance
 import Sidebar from '@/components/Sidebar.vue'; // Ensure the path is correct
@@ -8,16 +232,23 @@ export default {
   },
   data() {
     return {
+      routeToEdit: null,
       routes: [],
-      dialog: false,
-      formValid: false,
+      addDialog: false, // track 'add' or 'edit' dialog state
+      editDialog: false, // track 'add' or 'edit' dialog state
+      exportDialog: false, // track 'export' dialog state
       newRoute: { from: '', to: '', fare: '' },
       searchQuery: '',
       filterByDestination: 'All',
       page: 1,
       perPage: 5,
-      showForm: false,
-      routeToEdit: null, // Track which route is being edited
+      headers: [
+        { title: 'From', value: 'from' },
+        { title: 'To', value: 'to' },
+        { title: 'Fare (KES)', value: 'fare' },
+        { title: 'Created By', value: 'user' },
+        { title: 'Actions', value: 'actions', sortable: false },
+      ],
     };
   },
   computed: {
@@ -42,319 +273,178 @@ export default {
       const end = start + this.perPage;
       return this.filteredRoutes.slice(start, end);
     },
-    totalPages() {
-      return Math.ceil(this.filteredRoutes.length / this.perPage);
-    },
   },
   mounted() {
     this.fetchRoutes();
   },
   methods: {
-    // Fetch Routes
+
     async fetchRoutes() {
-  try {
-    // Get the token from localStorage
-    const token = localStorage.getItem("token");
+      try {
+        const token = localStorage.getItem("token");
 
-    // Check if the token exists
-    if (!token) {
-      console.error('No token found. Please log in.');
-      return;
-    }
+        if (!token) {
+          console.error('No token found. Please log in.');
+          return;
+        }
 
-    // Attempt to fetch routes using the axiosInstance
-    const response = await axiosInstance.get('/routes', {
-      headers: {
-        Authorization: `Bearer ${token}`, // Attach the token to the request headers
-      },
-    });
+        const response = await axiosInstance.get('/routes', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    if (response.data.success) {
-      this.routes = response.data.data;
-    } else {
-      this.routes = [];
-      console.warn('No routes available.');
-    }
-  } catch (error) {
-    // Handle errors if any
-    if (error.response) {
-      // Handle response errors
-      console.error('Error fetching routes:', error.response.data.message);
-
-      // Check for unauthorized error (e.g., token expired)
-      if (error.response.status === 401) {
-        console.error('Unauthorized request. Token may have expired.');
-        this.handleTokenExpiration(); // Implement your token expiration logic here
-      } else if (error.response.status === 500) {
-        console.error('Server error. Please try again later.');
-      } else if (error.response.status === 404) {
-        console.error('Routes not found. Check the endpoint.');
+        if (response.data.success) {
+          this.routes = response.data.data;
+        } else {
+          this.routes = [];
+          console.warn('No routes available.');
+        }
+      } catch (error) {
+        if (error.response) {
+          console.error('Error fetching routes:', error.response.data.message);
+        } else {
+          console.error('Error fetching routes:', error.message);
+        }
       }
-    } else if (error.request) {
-      // Handle request errors (e.g., no response from server)
-      console.error('Error fetching routes: No response from server');
-    } else {
-      // Handle other errors (e.g., configuration issues)
-      console.error('Error:', error.message);
-    }
-  }
-},
-
-    // Submit a new route
-    async submitRoute() {
-  if (!this.formValid) return;
-
-  try {
-    // Get the token from localStorage
-    const token = localStorage.getItem("token");
-
-    // Check if the token exists
-    if (!token) {
-      console.error('No token found. Please log in.');
-      return;
-    }
-
-    // Attempt to submit the route using the axiosInstance
-    const response = await axiosInstance.post('/addRoute', this.newRoute, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Attach the token to the request headers
-      },
-    });
-
-    if (response.data.success) {
-      this.routes.push(response.data.data);
-      this.toggleForm();
-    } else {
-      console.error('Failed to add route:', response.data.message);
-    }
-  } catch (error) {
-    console.error('Error adding route:', error);
-  }
-},
-
-    // Edit route
-    editRoute(route) {
-      this.routeToEdit = { ...route }; // Set the route to edit
-      this.newRoute = { ...route }; // Pre-fill the form with the selected route's data
-      this.showForm = true; // Show the form in edit mode
     },
 
-    // Update route
+    async addRoute() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error('No token found. Please log in.');
+          return;
+        }
+
+        const response = await axiosInstance.post('/addRoute', this.newRoute, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data.success) {
+          this.routes.push(response.data.data);
+          this.newRoute = { from: '', to: '', fare: '' };
+          this.addDialog = false;
+          console.log('Route added successfully.');
+        } else {
+          console.error('Failed to add route.');
+        }
+      } catch (error) {
+        console.error('Error adding route:', error.message);
+      }
+    },
+
     async updateRoute() {
-  if (!this.formValid) return;
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error('No token found. Please log in.');
+          return;
+        }
 
-  try {
-    // Get the token from localStorage
-    const token = localStorage.getItem("token");
+        if (!this.routeToEdit || !this.routeToEdit.id) {
+          console.error('Route to edit is not set.');
+          return;
+        }
 
-    // Check if the token exists
-    if (!token) {
-      console.error('No token found. Please log in.');
-      return;
-    }
+        const response = await axiosInstance.put(`/routes/${this.routeToEdit.id}`, this.routeToEdit, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    // Attempt to update the route using the axiosInstance
-    const response = await axiosInstance.put(`/routes/{id}/${this.routeToEdit.id}`, this.newRoute, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Attach the token to the request headers
-      },
-    });
-
-    if (response.data.success) {
-      const index = this.routes.findIndex(route => route.id === this.routeToEdit.id);
-      this.routes.splice(index, 1, response.data.data);
-      this.toggleForm();
-    } else {
-      console.error('Failed to update route:', response.data.message);
-    }
-  } catch (error) {
-    console.error('Error updating route:', error);
-  }
-},
-
-// Delete route
-async deleteRoute(routeId) {
-  try {
-    // Get the token from localStorage
-    const token = localStorage.getItem("token");
-
-    // Check if the token exists
-    if (!token) {
-      console.error('No token found. Please log in.');
-      return;
-    }
-
-    // Attempt to delete the route using the axiosInstance
-    const response = await axiosInstance.delete(`/deleteRoute/${routeId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`, // Attach the token to the request headers
-      },
-    });
-
-    if (response.data.success) {
-      this.routes = this.routes.filter(route => route.id !== routeId);
-    } else {
-      console.error('Failed to delete route:', response.data.message);
-    }
-  } catch (error) {
-    console.error('Error deleting route:', error);
-  }
-},
-
-
-    // Print routes
-    printRoutes() {
-      window.print();
+        if (response.data.success) {
+          const index = this.routes.findIndex(route => route.id === this.routeToEdit.id);
+          if (index !== -1) {
+            this.routes.splice(index, 1, response.data.data);
+          }
+          this.routeToEdit = null; // Reset routeToEdit after successful update
+          this.editDialog = false;
+          console.log('Route updated successfully.');
+        } else {
+          console.error('Failed to update route.');
+        }
+      } catch (error) {
+        console.error('Error updating route:', error.message);
+      }
     },
 
-    // Export routes to CSV
+    async deleteRoute(routeId) {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error('No token found. Please log in.');
+          return;
+        }
+
+        const response = await axiosInstance.delete(`/routes/${routeId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data.success) {
+          this.routes = this.routes.filter(route => route.id !== routeId);
+          console.log('Route deleted successfully.');
+        } else {
+          console.error('Failed to delete route.');
+        }
+      } catch (error) {
+        console.error('Error deleting route:', error.message);
+      }
+    },
+
+    toggleForm(type, route = null) {
+      if (type === 'add') {
+        this.addDialog = true;
+      } else if (type === 'edit') {
+        this.routeToEdit = { ...route };
+        this.editDialog = true;
+      }
+    },
+
+    closeDialog() {
+      this.addDialog = false;
+      this.editDialog = false;
+      this.exportDialog = false;
+    },
+
     exportRoutes() {
-      const csvContent = 'From,To,Fare\n' + this.filteredRoutes.map(route => {
-        return `${route.from},${route.to},${route.fare}`;
-      }).join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'routes.csv';
-      link.click();
-    },
-
-    // Toggle form visibility
-    toggleForm() {
-      this.showForm = !this.showForm;
-      this.newRoute = { from: '', to: '', fare: '' }; // Clear the form when toggling
-      this.routeToEdit = null;
-    },
-
-    // Get headers with authorization token
-    getAuthHeaders() {
       const token = localStorage.getItem("token");
-      return {
-        Authorization: `Bearer ${token}`,
-      };
-    },
+      if (!token) {
+        console.error('No token found. Please log in.');
+        return;
+      }
 
-    // Handle token expiration (optional)
-    handleTokenExpiration() {
-      // Implement your token expiration logic here, such as redirecting to login page
-      console.log('Token expired or invalid');
+      axiosInstance.get('/routes/export', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: 'blob', // important to receive blob response
+      })
+      .then(response => {
+        if (response.status === 200) {
+          const blob = new Blob([response.data], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.setAttribute('download', 'routes.pdf'); // filename
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          this.exportDialog = false;
+          console.log('Routes exported successfully.');
+        } else {
+          console.error('Failed to export routes.');
+        }
+      })
+      .catch(error => {
+        console.error('Error exporting routes:', error.message);
+      });
     },
-  },
-
-  created() {
-    this.fetchRoutes();
   },
 };
 </script>
 
-<template>
-  <v-app>
-    <Sidebar /> <!-- This is where the sidebar is included -->
-    <v-container class="container" width="100%">
-      <v-row>
-        <v-col cols="12">
-          <v-card elevation="0" width="100%" style="max-width: 1200px; background-color: #f9f9f9;">
-  <v-card-title class="font-weight-bold" style="background-color: #D32F2F; color: white; padding: 16px;">
-    Routes
-  </v-card-title>
-  <v-divider></v-divider>
-  <br>
-
-  <div v-if="showForm">
-    <v-form ref="form" v-model="formValid">
-      <v-text-field v-model="newRoute.from" label="From" required variant="outlined" dense></v-text-field>
-      <v-text-field v-model="newRoute.to" label="To" required variant="outlined" dense></v-text-field>
-      <v-text-field v-model="newRoute.fare" label="Fare (KES)" type="number" required variant="outlined" dense></v-text-field>
-
-      <v-row>
-        <v-col>
-          <v-btn color="primary" @click="submitRoute" :disabled="!formValid" block style="text-transform: capitalize;">Submit</v-btn>
-        </v-col>
-        <v-col>
-          <v-btn text @click="toggleForm" color="red" block style="text-transform: capitalize;">Cancel</v-btn>
-        </v-col>
-      </v-row>
-    </v-form>
-  </div>
-
-  <div v-else>
-    <!-- Search and Filter Controls -->
-    <v-row class="mb-4">
-      <v-col cols="12" sm="6" md="4">
-        <v-text-field
-          v-model="searchQuery"
-          label="Search Routes"
-          prepend-inner-icon="mdi-magnify"
-          clearable
-          variant="outlined"
-          dense
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="6" md="4">
-        <v-select
-          v-model="filterByDestination"
-          :items="['All', 'Destination A', 'Destination B', 'Destination C']"
-          label="Filter by Destination"
-          prepend-inner-icon="mdi-filter"
-          variant="outlined"
-          dense
-        ></v-select>
-      </v-col>
-      <v-col cols="12" sm="12" md="4" class="text-right">
-        <v-btn @click="printRoutes" color="secondary" icon class="mr-2">
-          <v-icon>mdi-printer</v-icon>
-        </v-btn>
-        <v-btn @click="exportRoutes" color="primary" icon class="mr-2">
-          <v-icon>mdi-file-export</v-icon>
-        </v-btn>
-        <v-btn @click="toggleForm" color="primary" class="mr-2" icon>
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <!-- Routes Table with action buttons -->
-    <v-table v-if="filteredRoutes.length" class="v-table">
-      <thead>
-        <tr style="text-transform: uppercase; background-color: #D32F2F; color: white; font-weight: bold;">
-          <th>From</th>
-          <th>To</th>
-          <th>Fare (KES)</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="route in paginatedRoutes" :key="route.id">
-          <td>{{ route.from }}</td>
-          <td>{{ route.to }}</td>
-          <td style="text-transform: uppercase;">KES {{ route.fare }}</td>
-          <td>
-            <v-btn @click="editRoute(route)" icon elevation="0">
-              <v-icon color="success">mdi-pencil</v-icon>
-            </v-btn>
-            <v-btn @click="deleteRoute(route.id)" icon elevation="0">
-              <v-icon color="red">mdi-delete</v-icon>
-            </v-btn>
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
-
-    <v-alert v-else type="error" :value="true">No routes found</v-alert>
-
-    <v-pagination v-model="page" :length="totalPages" color="primary" />
-  </div>
-</v-card>
-
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-app>
-</template>
-
-<style>
-.container{
-  margin-top: 150px;
-}
-
-</style>

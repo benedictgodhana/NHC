@@ -85,16 +85,7 @@
   </v-app-bar>
 
   <!-- Second App Bar (New) -->
-  <v-app-bar app color="white" dark>
-   
-    <v-spacer></v-spacer>
-    <v-btn icon @click="handleNewAction">
-      <v-icon>mdi-cog</v-icon>
-    </v-btn>
-    <v-btn style="background-color: green; color: white;" @click="handleAnotherAction">
-      <v-icon>mdi-refresh</v-icon> Refresh
-    </v-btn>
-  </v-app-bar>
+
 
     <!-- Main Content -->
   

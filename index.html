@@ -16,14 +16,29 @@
   <!-- Vue.js -->
   <script src="https://unpkg.com/vue@next"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
 
   <!-- Vue Cookies -->
   <script src="https://unpkg.com/vue-cookies@1.8.3/vue-cookies.js"></script>
   <style>
-    body {
-      font-family: "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    /* Import FuturaLT font */
+    @font-face {
+      font-family: "FuturaLT";
+      src: url("/public/fonts/futura-lt/FuturaLT.ttf") format("truetype");
+      font-weight: normal;
+      font-style: normal;
+    }
 
+     @font-face {
+      font-family: "FuturaLT";
+      src: url("/public/fonts/futura-lt/FuturaLT-BoldOblique.ttf") format("truetype");
+      font-weight: bold;
+      font-style: oblique;
+    }
+
+    body {
+      font-family: "FuturaLT", "system-ui", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
       font-size: 1em;
       font-weight: 400;
     }
