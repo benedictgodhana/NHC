@@ -16,6 +16,7 @@
   import ManagerCardTopup from '../views/Manager/CardTopup.vue';
 
   import Users from '../views/Admin/ManageUser.vue';
+  
 
 
 
@@ -24,6 +25,9 @@
 
   import ManageUsers from '@/views/Admin/ManageUser.vue'; // Adjust the import path as needed
   import Profile from '@/views/Admin/Profile.vue'; // Adjust the import path as needed
+  import ManagerProfile from '@/views/Manager/Profile.vue'; // Adjust the import path as needed
+
+  
 
   //Cashier
   import CashierDashboardView from '../views/Cashier/dashboard.vue';
@@ -32,6 +36,8 @@
 import CashierCardHolders from '@/views/Cashier/CardHolders.vue';
 import CashierCardTopUp from '@/views/Cashier/CardTopUp.vue';
 import CashierFeedback from '@/views/Cashier/Feedback.vue';
+import CashierProfile from '@/views/Cashier/Profile.vue'; // Adjust the import path as needed
+
   const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -44,7 +50,7 @@ import CashierFeedback from '@/views/Cashier/Feedback.vue';
         component: ManageUsers
       },
       {
-        path: '/admin/profile',
+        path: '/profile',
         name: 'Profile',
         component: Profile
       },
@@ -152,6 +158,13 @@ import CashierFeedback from '@/views/Cashier/Feedback.vue';
           meta: { requiresAuth: true }
         },
 
+        {
+          path: '/manager-profile',
+          name: 'Manager-profile',
+          component: ManagerProfile,
+          meta: { requiresAuth: true }
+        },
+
         //Cashier
 
         {
@@ -183,6 +196,13 @@ import CashierFeedback from '@/views/Cashier/Feedback.vue';
           path: '/cashier-feedback',
           name: 'CashierFeedback',
           component: CashierFeedback,
+          meta: { requiresAuth: true, role: 'cashier' },
+        },
+
+        {
+          path: '/cashier-profile',
+          name: 'CashierProfile',
+          component: CashierProfile,
           meta: { requiresAuth: true, role: 'cashier' },
         },
 

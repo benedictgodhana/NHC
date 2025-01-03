@@ -31,11 +31,7 @@
 
 
 
-
-        <v-list-item @click="$router.push('/feedback')" prepend-icon="mdi-comment-text-outline" title="Feedback" value="Feedback">
-        </v-list-item>
-
-        <v-list-item @click="profileDrawer = true" prepend-icon="mdi-account" title="Profile" value="Profile">
+        <v-list-item @click="$router.push('/profile')" prepend-icon="mdi-account" title="Profile" value="Profile">
         </v-list-item>
 
         <v-list-item @click="logout" prepend-icon="mdi-logout" title="Logout" value="Logout">

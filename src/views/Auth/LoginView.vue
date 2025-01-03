@@ -25,7 +25,6 @@ const isValidForm = computed(() => {
     const passwordValid = form.value.password.trim() !== '' && form.value.password.length >= 6;
     return usernameValid && passwordValid;
 });
-
 const submit = async () => {
     error.value = null; // Clear any previous errors
     loading.value = true; // Start loading
@@ -38,7 +37,7 @@ const submit = async () => {
     }
 
     try {
-        const response = await axiosInstance.post('/login', { // Adjust to NHC login endpoint
+        const response = await axiosInstance.post('/login', { // Adjust to your login endpoint
             username: form.value.username,
             password: form.value.password,
             remember: form.value.remember,
@@ -55,12 +54,17 @@ const submit = async () => {
             localStorage.setItem('user_role', JSON.stringify(user.roles ? user.roles[0].name : '')); // Extract the role if it's available
             
             console.log('User Role:', user.roles ? user.roles[0].name : 'undefined');
-            console.log('Redirecting to:', user.roles ? (user.roles[0].name === 'Admin' ? '/dashboard' : 'Invalid role') : 'Invalid role');
-
+            
             // Redirect based on role
             switch (user.roles ? user.roles[0].name : '') {
                 case 'Admin':
-                    router.push('/dashboard');
+                    router.push('/dashboard'); // Admin redirects to /dashboard
+                    break;
+                case 'Manager':
+                    router.push('/manager-dashboard'); // Manager redirects to their specific dashboard
+                    break;
+                case 'Cashier':
+                    router.push('/cashier-dashboard'); // Cashier redirects to their specific dashboard
                     break;
                 default:
                     error.value = 'Invalid role. Contact system administrator.';
@@ -76,6 +80,7 @@ const submit = async () => {
     }
 };
 </script>
+
 
 <template>
     <v-container fluid class="d-flex align-center justify-center min-vh-100">

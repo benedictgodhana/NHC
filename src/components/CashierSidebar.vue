@@ -13,21 +13,10 @@
             <v-list-item @click="$router.push('/cashier-book-tickets')" prepend-icon="mdi-ticket" title="Book Tickets" value="Book Tickets">
             </v-list-item>
     
-            <v-list-item @click="$router.push('/cashier-card-holders')" prepend-icon="mdi-card" title="Cards" value="Cards">
-            </v-list-item>
-    
-            <v-list-item @click="$router.push('/cashier-card-top-up')" prepend-icon="mdi-cash" title="Card Top Up" value="Card Top Up">
-            </v-list-item>
-
-
-            <v-list-item @click="$router.push('/cashier-routes')" prepend-icon="mdi-routes" title="Routes" value="Routes" >
-            </v-list-item>
+          
 
     
-            <v-list-item @click="$router.push('/cashier-feedback')" prepend-icon="mdi-comment-text-outline" title="Feedback" value="Feedback">
-            </v-list-item>
-    
-            <v-list-item @click="profileDrawer = true" prepend-icon="mdi-account" title="Profile" value="Profile">
+            <v-list-item  @click="$router.push('/cashier-profile')" prepend-icon="mdi-account" title="Profile" value="Profile">
             </v-list-item>
     
             <v-list-item @click="logout" prepend-icon="mdi-logout" title="Logout" value="Logout">
@@ -77,15 +66,7 @@
         </v-app-bar>
     
         <!-- Second App Bar (New) -->
-        <v-app-bar app color="white" dark>
-        <v-spacer></v-spacer>
-        <v-btn icon @click="handleNewAction">
-            <v-icon>mdi-cog</v-icon>
-        </v-btn>
-        <v-btn style="background-color: green; color: white;" @click="handleAnotherAction">
-            <v-icon>mdi-refresh</v-icon> Refresh
-        </v-btn>
-        </v-app-bar>
+     
     
         <!-- Main Content -->
         

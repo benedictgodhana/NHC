@@ -83,7 +83,7 @@
   
   <script>
   import axiosInstance from '@/service/api'; // Import axios instance
-  import Sidebar from '@/components/Sidebar.vue';
+  import Sidebar from '@/components/ManagerSidebar.vue';
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   
