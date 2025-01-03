@@ -8,7 +8,8 @@ export default {
   },
   data() {
     return {
-
+      alert: null, // Alert object
+      isSubmitting: false,  // Initialize as false
         cards: [], // Initialize cards        dialog: false,
       formValid: false,
       newCard: { name: '', description: '', price: '' }, // Update form for card fields
@@ -50,6 +51,11 @@ export default {
     this.fetchCards();
   },
   methods: {
+
+
+    clearAlert() {
+    this.alert = null;  // Clear alert when user closes it
+  },
     // Fetch Cards
     async fetchCards() {
   try {
@@ -83,72 +89,108 @@ export default {
 },
 
 
+async submitCard() {
+  if (!this.formValid || this.isSubmitting) return;
 
-    // Submit a new card
-    async submitCard() {
-      if (!this.formValid) return;
+  this.isSubmitting = true;  // Set submitting to true at the start
 
-      try {
-        const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-        if (!token) {
-          console.error('No token found. Please log in.');
-          return;
-        }
+    if (!token) {
+      console.error('No token found. Please log in.');
+      this.isSubmitting = false;  // Reset submitting state
+      return;
+    }
 
-        const response = await axiosInstance.post('/addCard', this.newCard, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token to the request headers
-          },
-        });
+    const response = await axiosInstance.post('/add-card', this.newCard, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Attach the token to the request headers
+      },
+    });
 
-        if (response.data.success) {
-          this.cards.push(response.data.data);
-          this.toggleForm();
-        } else {
-          console.error('Failed to add card:', response.data.message);
-        }
-      } catch (error) {
-        console.error('Error adding card:', error);
-      }
-    },
+    if (response.data.success) {
+      this.cards.push(response.data.data);
+      this.toggleForm();
 
-    // Edit card
+      // Show success alert
+      this.alert = { type: 'success', message: 'Card added successfully!' };
+    } else {
+      console.error('Failed to add card:', response.data.message);
+
+      // Show error alert
+      this.alert = { type: 'error', message: response.data.message || 'Failed to add card.' };
+    }
+  } catch (error) {
+    console.error('Error adding card:', error);
+    this.alert = { type: 'error', message: 'An unexpected error occurred.' };
+  } finally {
+    this.isSubmitting = false;  // Reset submitting state regardless of outcome
+  }
+},
+
+
     editCard(card) {
-      this.cardToEdit = { ...card }; // Set the card to edit
-      this.newCard = { ...card }; // Pre-fill the form with the selected card's data
-      this.showForm = true; // Show the form in edit mode
-    },
+    this.cardToEdit = { ...card }; // Set the card to edit
+    this.newCard = { ...card }; // Pre-fill the form
+    this.showForm = true; // Show the form in edit mode
+  },
+ 
+async updateCard() {
+  if (!this.formValid || this.isSubmitting) return;
 
-    // Update card
-    async updateCard() {
-      if (!this.formValid) return;
+  this.isSubmitting = true; // Set submitting to true
 
-      try {
-        const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-        if (!token) {
-          console.error('No token found. Please log in.');
-          return;
-        }
+    if (!token) {
+      console.error('No token found. Please log in.');
+      this.isSubmitting = false;
+      return;
+    }
 
-        const response = await axiosInstance.put(`/cards/${this.cardToEdit.id}`, this.newCard, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token to the request headers
-          },
-        });
+    const response = await axiosInstance.put(`/cards/${this.cardToEdit.id}`, this.newCard, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Attach the token to the request headers
+      },
+    });
 
-        if (response.data.success) {
-          const index = this.cards.findIndex(card => card.id === this.cardToEdit.id);
-          this.cards.splice(index, 1, response.data.data);
-          this.toggleForm();
-        } else {
-          console.error('Failed to update card:', response.data.message);
-        }
-      } catch (error) {
-        console.error('Error updating card:', error);
-      }
-    },
+    if (response.data.success) {
+      const index = this.cards.findIndex(card => card.id === this.cardToEdit.id);
+      this.cards.splice(index, 1, response.data.data);
+      this.toggleForm();
+
+      // Show success alert
+      this.alert = { type: 'success', message: 'Card updated successfully!' };
+
+      // Auto-hide alert after 4 seconds
+      setTimeout(() => {
+        this.clearAlert();
+      }, 4000); // 4000 ms = 4 seconds
+    } else {
+      console.error('Failed to update card:', response.data.message);
+
+      // Show error alert
+      this.alert = { type: 'error', message: response.data.message || 'Failed to update card.' };
+
+      // Auto-hide alert after 4 seconds
+      setTimeout(() => {
+        this.clearAlert();
+      }, 4000); // 4000 ms = 4 seconds
+    }
+  } catch (error) {
+    console.error('Error updating card:', error);
+    this.alert = { type: 'error', message: 'An unexpected error occurred.' };
+
+    // Auto-hide alert after 4 seconds
+    setTimeout(() => {
+      this.clearAlert();
+    }, 4000); // 4000 ms = 4 seconds
+  } finally {
+    this.isSubmitting = false; // Reset submitting state
+  }
+},
 
     // Delete card
     async deleteCard(cardId) {
@@ -193,12 +235,11 @@ export default {
       link.click();
     },
 
-    // Toggle form visibility
     toggleForm() {
-      this.showForm = !this.showForm;
-      this.newCard = { name: '', description: '', price: '' }; // Clear the form when toggling
-      this.cardToEdit = null;
-    },
+    this.showForm = !this.showForm;
+    this.newCard = { name: '', description: '', price: '' }; // Reset form for add
+    this.cardToEdit = null; // Clear edit mode
+  },
   },
 
   created() {
@@ -206,44 +247,109 @@ export default {
   },
 };
 </script>
+
 <template>
   <v-app>
-    <Sidebar /> <!-- This is where the sidebar is included -->
+    <Sidebar />
     <v-container class="container" width="100%">
       <v-row>
         <v-col cols="12">
           <v-card elevation="0" width="100%" style="max-width: 1200px;">
-            <v-card-title style="background-color: red;">Cards</v-card-title>
-            <br><br>
+            <v-card-title style="background-color: red; color: white;">Cards</v-card-title>
+            <br />
 
+            <!-- Card Form -->
             <div v-if="showForm">
-              <v-form ref="form" v-model="formValid">
-                <v-text-field v-model="newCard.serial_number" label="Card Serial Number" required variant="outlined"></v-text-field>
-                <v-text-field v-model="newCard.name" label="Card Name" required variant="outlined" ></v-text-field>
-                <v-text-field v-model="newCard.email" label="Card Email" required variant="outlined"></v-text-field>
-                <v-select 
-  v-model="newCard.status" 
-  :items="['Active', 'Inactive']" 
-  label="Card Status" 
-  required
-  variant="outlined"
-></v-select>
-<v-row>
-  <v-col>
 
-    <v-btn color="primary" @click="submitCard" :disabled="!formValid" width="100%" style="text-transform: capitalize;">Submit</v-btn>
-  </v-col>
-  <v-col>
-    <v-btn text @click="toggleForm" color="red" width="100%" style="text-transform: capitalize;">Cancel</v-btn>
+                <!-- Alert for success or error -->
+      <v-alert
+        v-if="alert"
+        :value="alert !== null"
+        :type="alert.type"
+        :close-button="true"
+        @close="clearAlert"
+      >
+        {{ alert.message }}
+      </v-alert>
+      <br>
+              <v-card>
+                <v-card-title>
+                  <span>{{ cardToEdit ? 'Edit Card' : 'Add New Card' }}</span>
+                </v-card-title>
+                <v-card-text>
+                  <v-form ref="form" v-model="formValid">
+  <br>
+  <v-text-field
+    v-model="newCard.serial_number"
+    label="Card Serial Number"
+    required
+    variant="outlined"
+  ></v-text-field>
+  
+  <v-text-field
+    v-model="newCard.name"
+    label="Card Name"
+    required
+    variant="outlined"
+  ></v-text-field>
+  
+  <v-text-field
+    v-model="newCard.email"
+    label="Card Email"
+    required
+    variant="outlined"
+  ></v-text-field>
+  
+  <v-text-field
+    v-model="newCard.tel"
+    label="Card Phone"
+    required
+    variant="outlined"
+    type="tel"  
+  ></v-text-field>
+  
+  <v-select
+    v-model="newCard.status"
+    :items="['Active', 'Inactive']"
+    label="Card Status"
+    required
+    variant="outlined"
+  ></v-select>
 
-  </v-col>
-</v-row>
+  <v-row>
+    <v-col>
+      <v-btn
+        :color="cardToEdit ? 'success' : 'primary'"
+        :loading="isSubmitting"  
+        @click="cardToEdit ? updateCard() : submitCard()"
+        :disabled="!formValid || isSubmitting"  
+        style="text-transform: capitalize;"
+        width="100%"
 
-              </v-form>
+      >
+        {{ cardToEdit ? 'Update Card' : 'Submit' }}
+      </v-btn>
+    </v-col>
+    <v-col>
+      <v-btn
+        text
+        @click="toggleForm"
+        color="red"
+        width="100%"
+        style="text-transform: capitalize;"
+      >
+        Cancel
+      </v-btn>
+    </v-col>
+  </v-row>
+</v-form>
+
+                </v-card-text>
+              </v-card>
             </div>
 
+            <!-- Cards List -->
             <div v-else>
-              <!-- Search and Filter Controls -->
               <v-row class="mb-4">
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
@@ -254,54 +360,54 @@ export default {
                     variant="outlined"
                   ></v-text-field>
                 </v-col>
-
                 <v-col cols="12" sm="12" md="4" class="text-right">
-                  <v-btn @click="printCards" color="secondary" icon class="mr-2">
-                    <v-icon>mdi-printer</v-icon>
+                  <v-btn @click="printCards" color="secondary" class="mr-2" style="text-transform: capitalize;">
+                    <v-icon>mdi-printer</v-icon>Print
                   </v-btn>
-                  <v-btn @click="exportCards" color="primary" icon class="mr-2">
-                    <v-icon>mdi-file-export</v-icon>
+                  <v-btn @click="exportCards" color="primary"  class="mr-2" style="text-transform: capitalize;">
+                    <v-icon>mdi-file-export</v-icon>Export
                   </v-btn>
-                  <v-btn @click="toggleForm" color="primary" class="mr-2" icon>
-                    <v-icon>mdi-plus</v-icon>
+                  <v-btn @click="toggleForm" color="primary" class="mr-2" style="text-transform: capitalize;" >
+                    <v-icon>mdi-plus</v-icon>Add Card
                   </v-btn>
                 </v-col>
               </v-row>
 
-              <!-- Cards Table with action buttons -->
-              <v-table v-if="filteredCards.length" class="v-table">
-  <thead>
-    <tr style="text-transform: uppercase;background-color: red;color:white;font-weight:bolder;">
-      <th>Serial Number</th>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Status</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <br>
-  <tbody>
-    <!-- Use paginatedCards instead of cards -->
-    <tr v-for="card in paginatedCards" :key="card.id">
-      <td>{{ card.serial_number }}</td>
-      <td>{{ card.name }}</td>
-      <td>{{ card.email }}</td>
-      <td>{{ card.status }}</td>
-      <td>
-        <v-btn @click="editCard(card)" icon elevation="0">
-          <v-icon color="success">mdi-pencil</v-icon>
-        </v-btn>
-        <v-btn @click="deleteCard(card.id)" icon elevation="0">
-          <v-icon color="red">mdi-delete</v-icon>
-        </v-btn>
-      </td>
-    </tr>
-  </tbody>
-</v-table>
+              <v-table v-if="filteredCards.length">
+                <thead>
+                  <tr style="background-color: red; color: white; font-weight: bolder;">
+                    <th>Serial Number</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="card in paginatedCards" :key="card.id">
+                    <td>{{ card.serial_number }}</td>
+                    <td>{{ card.name }}</td>
+                    <td>{{ card.email }}</td>
+                    <td>{{ card.tel }}</td>
+                    <td>{{ card.status }}</td>
+                    <td>
+                      <v-btn @click="editCard(card)" icon elevation="0">
+                        <v-icon color="success">mdi-pencil</v-icon>
+                      </v-btn>
+                      <v-btn @click="deleteCard(card.id)" icon elevation="0">
+                        <v-icon color="red">mdi-delete</v-icon>
+                      </v-btn>
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
 
+              <v-alert v-else type="info" elevation="2">
+                No cards found matching your criteria.
+              </v-alert>
 
-              <v-alert v-else type="error">No cards found</v-alert>
-              <v-pagination v-if="totalPages > 1" v-model="page" :length="totalPages" rounded></v-pagination>
+              <v-pagination v-model="page" :length="totalPages" class="mt-4" />
             </div>
           </v-card>
         </v-col>

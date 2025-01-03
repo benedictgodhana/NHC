@@ -111,18 +111,7 @@ const submit = async () => {
               :rules="[value => value && value.length >= 3 || 'Username must be at least 3 characters long.']"
             ></v-text-field>
   
-            <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
-              Password
-  
-              <a
-                class="text-caption text-decoration-none text-blue"
-                href="#"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Forgot login password?</a>
-            </div>
-  
+            
             <v-text-field
               v-model="form.password"
               :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
@@ -135,36 +124,33 @@ const submit = async () => {
               :rules="[value => value && value.length >= 6 || 'Password must be at least 6 characters long.']"
             ></v-text-field>
   
-            <v-card
-              class="mb-12"
-              color="surface-variant"
-              variant="tonal"
-            >
-            </v-card>
-  
             <v-btn
               @click="submit"
               class="mb-8"
-              color="blue"
-              size="large"
-              variant="tonal"
+              color="red"
+              variant="flat"
+              style="text-transform: capitalize;"
               block
               :loading="loading"
               :disabled="!isValidForm"
             >
-              Log In
+              Log In <v-icon>mdi-login</v-icon>
             </v-btn>
+
+            <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
+  <a
+    class="text-caption text-decoration-none text-blue"
+    href="/forgot-password"  
+    rel="noopener noreferrer"
+    target="_blank"
+  >
+    Forgot password? Click here!
+  </a>
+</div>
+
   
-            <v-card-text class="text-center">
-              <a
-                class="text-blue text-decoration-none"
-                href="#"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Sign up now <v-icon icon="mdi-chevron-right"></v-icon>
-              </a>
-            </v-card-text>
+  
+           
           </v-card>
         </v-col>
       </v-row>

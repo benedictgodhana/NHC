@@ -7,28 +7,25 @@
   
       <v-list nav dense>
   
-        <v-list-item @click="$router.push('/manager-dashboard')" prepend-icon="mdi-home" title="Dashboard" value="Dashboard">
-        </v-list-item>
-  
-        <v-list-item @click="$router.push('/manager-book-tickets')" prepend-icon="mdi-ticket" title="All Booked Tickets" value="Book Tickets">
-        </v-list-item>
-  
-        <v-list-item @click="$router.push('/manager-card_holders')" prepend-icon="mdi-card" title="Cards" value="Cards">
-        </v-list-item>
-  
-        <v-list-item @click="$router.push('/manager-card_top_up')" prepend-icon="mdi-cash" title="Card Top Up" value="Card Top Up">
-        </v-list-item>
+  <v-list-item @click="$router.push('/manager-dashboard')" prepend-icon="mdi-home" title="Dashboard" value="Dashboard" class="bold-text">
+  </v-list-item>
 
+  <v-list-item @click="$router.push('/manager-book-tickets')" prepend-icon="mdi-ticket" title="All Booked Tickets" value="Book Tickets" class="bold-text">
+  </v-list-item>
 
-  
-  
-        <v-list-item  @click="$router.push('/manager-profile')" prepend-icon="mdi-account" title="Profile" value="Profile">
-        </v-list-item>
-  
-       
-        <v-list-item @click="logout" prepend-icon="mdi-logout" title="Logout" value="Logout">
-        </v-list-item>
-      </v-list>
+  <v-list-item @click="$router.push('/manager-card_holders')" prepend-icon="mdi-card" title="Cards" value="Cards" class="bold-text">
+  </v-list-item>
+
+  <v-list-item @click="$router.push('/manager-card_top_up')" prepend-icon="mdi-cash" title="Card Top Up" value="Card Top Up" class="bold-text">
+  </v-list-item>
+
+  <v-list-item @click="$router.push('/manager-profile')" prepend-icon="mdi-account" title="Profile" value="Profile" class="bold-text">
+  </v-list-item>
+
+  <v-list-item @click="logout" prepend-icon="mdi-logout" title="Logout" value="Logout" class="bold-text">
+  </v-list-item>
+</v-list>
+
     </v-navigation-drawer>
   
     <!-- Profile Drawer -->
@@ -157,4 +154,9 @@
     },
   };
   </script>
-  
+  <style>
+
+.bold-text {
+  font-weight: bold;
+}
+</style>

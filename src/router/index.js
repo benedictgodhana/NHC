@@ -37,12 +37,19 @@ import CashierCardHolders from '@/views/Cashier/CardHolders.vue';
 import CashierCardTopUp from '@/views/Cashier/CardTopUp.vue';
 import CashierFeedback from '@/views/Cashier/Feedback.vue';
 import CashierProfile from '@/views/Cashier/Profile.vue'; // Adjust the import path as needed
+import ForgotPassword from '@/views/Auth/ForgotPassword.vue'; // Adjust the import path as needed
+import ResetPassword from '@/views/Auth/PasswordResetForm.vue'; // Adjust the import path as needed
+
 
   const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
 
-
+      {
+        path: '/password/reset/:token',
+        name: 'password.reset',
+        component: ResetPassword,
+      },
 
       {
         path: '/admin/manage-users',
@@ -54,6 +61,13 @@ import CashierProfile from '@/views/Cashier/Profile.vue'; // Adjust the import p
         name: 'Profile',
         component: Profile
       },
+      {
+        path: '/forgot-password',
+        name: 'forgot-password',
+        component: ForgotPassword,
+        meta: { requiresAuth: false }
+      },
+
       {
         path: '/',
         name: 'home',
