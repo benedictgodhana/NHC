@@ -273,7 +273,7 @@ async updateCard() {
       </v-alert>
       <br>
               <v-card>
-                <v-card-title>
+                <v-card-title style="background:red">
                   <span>{{ cardToEdit ? 'Edit Card' : 'Add New Card' }}</span>
                 </v-card-title>
                 <v-card-text>
